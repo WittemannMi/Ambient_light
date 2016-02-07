@@ -40,20 +40,20 @@ Pin description:
  0: 
  1: 
  2: 
- 3: 
+ 3: LEDpin (PWM)
  4: 
  5: 
  6: 
  7: 
  8:  
  9: 
-10: 
-11: 
-12: 
-13: 
+10: HC-SR04-1 Echo
+11: HC-SR04-1 Trig
+12: HC-SR04-2 Echo
+13: HC-SR04-2 Trig
 
  --analog pins--:
- A0: 
+ A0: Light Sensor Output
  A1: 
  A2:
  A3:
@@ -65,33 +65,78 @@ Pin description:
 /*--------------------------------------------------------------------------------------
   Includes
 --------------------------------------------------------------------------------------*/
-
+#include <NewPing.h>    //NewPing sonar(trigger_pin, echo_pin [, max_cm_distance]);
 
 /*--------------------------------------------------------------------------------------
   Init the LCD library with the LCD pins to be used, DHT sesor and serial
 --------------------------------------------------------------------------------------*/
+NewPing sonar1(11, 10, 300);
 
 /*--------------------------------------------------------------------------------------
   Defines
 --------------------------------------------------------------------------------------*/
 //PINS:
 
+#define LIGHT_ADC_PIN            A0  // A0 is the Light Sensor ADC input
 
+#define ECHO1_PIN                10  // HC-SR04-1 Echo pin
+#define TRIG1_PIN                11  // HC-SR04-1 Trig pin
+
+#define ECHO2_PIN                12  // HC-SR04-2 Echo pin
+#define TRIG2_PIN                13  // HC-SR04-2 Trig pin
+
+#define LED_PIN                  3  // HC-SR04-2 Trig pin
 
 /*--------------------------------------------------------------------------------------
   global Variables
 --------------------------------------------------------------------------------------*/
+int lightValue;
+
+long Sensor1detect, Sensor2detect;
 
 /*--------------------------------------------------------------------------------------
   Functions
 --------------------------------------------------------------------------------------*/
 
-void setup() {
-  // put your setup code here, to run once:
-
+void LEDon()
+{
+ analogWrite(LED_PIN, 250); 
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
+void setup()
+{
+ Serial.begin(9600);   // Setup the serial debug connection
+
+ pinMode(ECHO1_PIN, INPUT);
+ pinMode(TRIG1_PIN, OUTPUT);
+
+ pinMode(ECHO2_PIN, INPUT);
+ pinMode(TRIG2_PIN, OUTPUT); 
+}
+
+void loop() 
+{
+ 
+ lightValue = analogRead(LIGHT_ADC_PIN);
+ 
+ if(lightValue >= 100)   // Only turn on the lights if the room is dark (900)
+ {
+  Sensor1detect = sonar1.ping_cm();  // read sensor 1 value
+  if(Sensor1detect <=10)    // only if there is a value below 100cm someone is getting out of bed (for tests set to 10)
+  {
+   LEDon(); 
+  }
+ }
+ 
+  Serial.print(Sensor1detect);
+  Serial.println("cm");
+  delay(200);
+  Serial.print("Light:");
+  Serial.println(lightValue);
+  delay(200);
+// Serial.print("Light Value:");
+ //Serial.println(lightValue);
+ //delay(100);
+
 
 }
