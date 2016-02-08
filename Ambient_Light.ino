@@ -70,7 +70,7 @@ Pin description:
 /*--------------------------------------------------------------------------------------
   Init the LCD library with the LCD pins to be used, DHT sesor and serial
 --------------------------------------------------------------------------------------*/
-NewPing sonar1(11, 10, 300);
+NewPing sonar1(11, 10, 600);
 
 /*--------------------------------------------------------------------------------------
   Defines
@@ -125,8 +125,10 @@ void loop()
 {
  
  lightValue = analogRead(LIGHT_ADC_PIN);
+ delay(50); 
  Sensor1detect = sonar1.ping_cm();  // read sensor 1 value
- 
+ //Sensor1detect = sonar1.ping_median();
+ //Sensor1detect = sonar1.convert_cm(Sensor1detect);
  if(lightValue >= 700)   // Only turn on the lights if the room is dark (900)
  {
   if(Sensor1detect <=10)    // only if there is a value below 100cm someone is getting out of bed (for tests set to 10)
