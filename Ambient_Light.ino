@@ -100,28 +100,35 @@ long Sensor1detect, Sensor2detect;
 
 void LEDon()
 {
- analogWrite(LED_PIN, 250); 
+ digitalWrite(LED_PIN, HIGH);   // turn on LED with full intensity
+ delay(30000);                  // stay on with full intensity for 30 seconds
+ for(int i=150; i>=0;i--)       // dim the LEDs for 150 seconds
+ {
+  analogWrite(LED_PIN, i); 
+  delay(1000);
+ }
+ digitalWrite(LED_PIN, LOW);   // turn off LEDs after 180 seconds total
 }
 
 void setup()
 {
  Serial.begin(9600);   // Setup the serial debug connection
 
- pinMode(ECHO1_PIN, INPUT);
- pinMode(TRIG1_PIN, OUTPUT);
+ //pinMode(ECHO1_PIN, INPUT);
+ //pinMode(TRIG1_PIN, OUTPUT);
 
- pinMode(ECHO2_PIN, INPUT);
- pinMode(TRIG2_PIN, OUTPUT); 
+// pinMode(ECHO2_PIN, INPUT);
+// pinMode(TRIG2_PIN, OUTPUT); 
 }
 
 void loop() 
 {
  
  lightValue = analogRead(LIGHT_ADC_PIN);
+ Sensor1detect = sonar1.ping_cm();  // read sensor 1 value
  
- if(lightValue >= 100)   // Only turn on the lights if the room is dark (900)
+ if(lightValue >= 700)   // Only turn on the lights if the room is dark (900)
  {
-  Sensor1detect = sonar1.ping_cm();  // read sensor 1 value
   if(Sensor1detect <=10)    // only if there is a value below 100cm someone is getting out of bed (for tests set to 10)
   {
    LEDon(); 
@@ -134,9 +141,5 @@ void loop()
   Serial.print("Light:");
   Serial.println(lightValue);
   delay(200);
-// Serial.print("Light Value:");
- //Serial.println(lightValue);
- //delay(100);
-
 
 }
