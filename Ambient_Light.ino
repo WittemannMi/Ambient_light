@@ -65,12 +65,12 @@ Pin description:
 /*--------------------------------------------------------------------------------------
   Includes
 --------------------------------------------------------------------------------------*/
-#include <NewPing.h>    //NewPing sonar(trigger_pin, echo_pin [, max_cm_distance]);
+//#include <NewPing.h>    //NewPing sonar(trigger_pin, echo_pin [, max_cm_distance]);
 
 /*--------------------------------------------------------------------------------------
   Init the LCD library with the LCD pins to be used, DHT sesor and serial
 --------------------------------------------------------------------------------------*/
-NewPing sonar1(11, 10, 600);
+//NewPing sonar1(11, 10, 600);
 
 /*--------------------------------------------------------------------------------------
   Defines
@@ -85,14 +85,14 @@ NewPing sonar1(11, 10, 600);
 #define ECHO2_PIN                12  // HC-SR04-2 Echo pin
 #define TRIG2_PIN                13  // HC-SR04-2 Trig pin
 
-#define LED_PIN                  3  // HC-SR04-2 Trig pin
+#define LED_PIN                  3  // FET-GATE LED
 
 /*--------------------------------------------------------------------------------------
   global Variables
 --------------------------------------------------------------------------------------*/
 int lightValue;
 
-long Sensor1detect, Sensor2detect;
+long Sensor1detect, Sensor2detect, duration1, duration2;
 
 /*--------------------------------------------------------------------------------------
   Functions
@@ -110,15 +110,58 @@ void LEDon()
  digitalWrite(LED_PIN, LOW);   // turn off LEDs after 180 seconds total
 }
 
+void READsensor1()
+{
+ digitalWrite(TRIG1_PIN, LOW);
+ delayMicroseconds(5);
+ digitalWrite(TRIG1_PIN, HIGH);
+ delayMicroseconds(10);
+ digitalWrite(TRIG1_PIN, LOW);
+
+ duration1 = pulseIn(ECHO1_PIN,HIGH); 
+ Sensor1detect = (duration1/2) / 29.1; 
+
+ if(duration1 == 0 && digitalRead(ECHO1_PIN) == HIGH)
+ {
+  pinMode(ECHO1_PIN, OUTPUT);
+  digitalWrite(ECHO1_PIN, LOW);
+  delay(100);
+  pinMode(ECHO1_PIN, INPUT);
+  Serial.print("RESET SENSOR1");
+  Sensor1detect = 100; // set to a value that does not turn on the LED
+ }
+}
+
+void READsensor2()
+{
+ digitalWrite(TRIG2_PIN, LOW);
+ delayMicroseconds(5);
+ digitalWrite(TRIG2_PIN, HIGH);
+ delayMicroseconds(10);
+ digitalWrite(TRIG2_PIN, LOW);
+
+ duration2 = pulseIn(ECHO2_PIN,HIGH); 
+ Sensor2detect = (duration2/2) / 29.1; 
+
+ if(duration2 == 0 && digitalRead(ECHO2_PIN) == HIGH)
+ {
+  pinMode(ECHO2_PIN, OUTPUT);
+  digitalWrite(ECHO2_PIN, LOW);
+  delay(100);
+  pinMode(ECHO2_PIN, INPUT);
+  Serial.print("RESET SENSOR2");
+ }
+}
+
 void setup()
 {
  Serial.begin(9600);   // Setup the serial debug connection
 
- //pinMode(ECHO1_PIN, INPUT);
- //pinMode(TRIG1_PIN, OUTPUT);
+ pinMode(ECHO1_PIN, INPUT);
+ pinMode(TRIG1_PIN, OUTPUT);
 
-// pinMode(ECHO2_PIN, INPUT);
-// pinMode(TRIG2_PIN, OUTPUT); 
+ pinMode(ECHO2_PIN, INPUT);
+ pinMode(TRIG2_PIN, OUTPUT); 
 }
 
 void loop() 
@@ -126,14 +169,16 @@ void loop()
  
  lightValue = analogRead(LIGHT_ADC_PIN);
  delay(50); 
- Sensor1detect = sonar1.ping_cm();  // read sensor 1 value
- //Sensor1detect = sonar1.ping_median();
- //Sensor1detect = sonar1.convert_cm(Sensor1detect);
+ //Sensor1detect = sonar1.ping_cm();  // read sensor 1 value
+ //Read Sensor without library
+ READsensor1();           // Read Sensor 1 distance
+ //READsensor2();         // read Sensor 2 distance
+
  if(lightValue >= 700)   // Only turn on the lights if the room is dark (900)
  {
-  if(Sensor1detect <=10)    // only if there is a value below 100cm someone is getting out of bed (for tests set to 10)
+  if((Sensor1detect <=10) || (Sensor2detect <0))    // only if there is a value below 50cm on either side of the bed someone is getting out of bed (for tests set to 10)
   {
-   LEDon(); 
+   LEDon();   // turn on the LEDS if someone is getting out of bed
   }
  }
  
