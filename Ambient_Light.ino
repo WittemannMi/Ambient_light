@@ -100,7 +100,7 @@ long Sensor1detect, Sensor2detect, duration1, duration2;
 
 void LEDon()
 {
- digitalWrite(LED_PIN, HIGH);   // turn on LED with full intensity
+ digitalWrite(LED_PIN, HIGH);   // turn on LED with full intensity, check brightnes with the actual LEDS
  delay(30000);                  // stay on with full intensity for 30 seconds
  for(int i=150; i>=0;i--)       // dim the LEDs for 150 seconds
  {
@@ -121,7 +121,7 @@ void READsensor1()
  duration1 = pulseIn(ECHO1_PIN,HIGH); 
  Sensor1detect = (duration1/2) / 29.1; 
 
- if(duration1 == 0 && digitalRead(ECHO1_PIN) == HIGH)
+ if(duration1 == 0 && digitalRead(ECHO1_PIN) == HIGH)    // Unlock sensor if it gets stuck, because of timeout problem
  {
   pinMode(ECHO1_PIN, OUTPUT);
   digitalWrite(ECHO1_PIN, LOW);
@@ -143,7 +143,7 @@ void READsensor2()
  duration2 = pulseIn(ECHO2_PIN,HIGH); 
  Sensor2detect = (duration2/2) / 29.1; 
 
- if(duration2 == 0 && digitalRead(ECHO2_PIN) == HIGH)
+ if(duration2 == 0 && digitalRead(ECHO2_PIN) == HIGH)   // Unlock sensor if it gets stuck, because of timeout problem
  {
   pinMode(ECHO2_PIN, OUTPUT);
   digitalWrite(ECHO2_PIN, LOW);
